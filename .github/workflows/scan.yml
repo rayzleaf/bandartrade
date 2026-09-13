@@ -1,0 +1,41 @@
+name: Breakout Signal Scan
+
+on:
+  schedule:
+    # Tiap 15 menit, jam 07:00-17:59 UTC, Senin-Jumat -- mencakup sesi London
+    # (range) sampai overlap London-NY (monitor_end EUR/USD & XAU/USD = 17:00 UTC).
+    # Wajib mencakup jam 17:00 supaya time-exit force-close benar2 kepicu.
+    - cron: '*/15 7-17 * * 1-5'
+  workflow_dispatch:  # supaya bisa dipicu manual dari tab Actions buat testing
+
+permissions:
+  contents: write  # wajib, supaya workflow boleh commit balik signals_log.csv
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - run: pip install requests
+
+      - run: python breakout_signal_bot.py
+        env:
+          TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+
+      # Simpan signals_log.csv balik ke repo, supaya datanya nyambung
+      # ke run berikutnya (GitHub Actions gak menyimpan file antar-run
+      # kecuali di-commit begini).
+      - name: Commit signal log
+        run: |
+          git config user.name "signal-bot"
+          git config user.email "signal-bot@users.noreply.github.com"
+          git add signals_log.csv
+          git diff --staged --quiet || git commit -m "Update signal log [skip ci]"
+          git push
