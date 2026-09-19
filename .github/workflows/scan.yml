@@ -2,10 +2,14 @@ name: Breakout Signal Scan
 
 on:
   schedule:
-    # Tiap 15 menit, jam 07:00-17:59 UTC, Senin-Jumat -- mencakup sesi London
-    # (range) sampai overlap London-NY (monitor_end EUR/USD & XAU/USD = 17:00 UTC).
-    # Wajib mencakup jam 17:00 supaya time-exit force-close benar2 kepicu.
+    # Tiap 15 menit, jam 07:00-17:59 UTC, Senin-Jumat -- DIBIARKAN sebagai bonus,
+    # tapi jangan diandalkan: GitHub mendahulukan repo yang sudah lama aktif,
+    # jadi di repo baru seperti ini jadwal ini bisa telat berjam-jam atau
+    # jarang jalan sama sekali. Lihat repository_dispatch di bawah untuk
+    # jalur pemicu yang lebih bisa diandalkan (lewat cron-job.org).
     - cron: '*/15 7-17 * * 1-5'
+  repository_dispatch:
+    types: [run-scan]
   workflow_dispatch:  # supaya bisa dipicu manual dari tab Actions buat testing
 
 permissions:
