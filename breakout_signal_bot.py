@@ -122,12 +122,22 @@ SYMBOLS = {
     # menurut riset sesi trading, bukan cuma "London open" seperti versi
     # sebelumnya.
     "EUR/USD": {
+        # DI-PAUSE (enabled=False) per hasil backtest: 12 trade, profit
+        # factor 0.32, dominan kalah lewat stop_loss (whipsaw setelah
+        # breakout, bukan momentum lanjut). Dua hipotesis perbaikan sudah
+        # diuji dan SAMA-SAMA GAGAL memperbaiki (skip jam rilis berita:
+        # PF 0.35; stop dilebarkan 2x ATR: PF 0.34) -- jadi bukan sekadar
+        # salah parameter. Config tetap disimpan (bukan dihapus) supaya
+        # gampang diaktifkan lagi begitu ada cukup data forward-test baru
+        # buat evaluasi ulang. Sinyal yang kebetulan sudah open tetap
+        # dilacak sampai closed walau enabled=False (lihat main()).
         "interval": "15min",
         "range_start": "07:00",
         "range_end": "13:00",
         "monitor_start": "13:00",
         "monitor_end": "17:00",
         "use_volume": False,
+        "enabled": False,
     },
     "XAU/USD": {
         "interval": "15min",
@@ -136,6 +146,7 @@ SYMBOLS = {
         "monitor_start": "13:00",
         "monitor_end": "17:00",
         "use_volume": False,
+        "enabled": True,
     },
     "QQQ": {
         # 13:30-13:45 UTC = 9:30-9:45 pagi waktu New York (EDT, musim panas)
@@ -145,6 +156,7 @@ SYMBOLS = {
         "monitor_start": "13:45",
         "monitor_end": "16:00",
         "use_volume": True,
+        "enabled": True,
         "broker_note": (
             "QQQ dipakai sebagai proxy Nasdaq-100 karena datanya gratis. "
             "Broker kamu kemungkinan pakai simbol berbeda (US100/NAS100/USTECH). "
@@ -541,8 +553,14 @@ def main():
             f"Return: {row['return_pct']}%"
         )
 
-    # 3. Cari sinyal baru untuk simbol yang candle-nya berhasil diambil.
+    # 3. Cari sinyal baru untuk simbol yang enabled DAN candle-nya berhasil diambil.
+    #    Simbol enabled=False (mis. EUR/USD saat ini) tetap diproses di langkah 1-2
+    #    di atas kalau kebetulan masih ada sinyal open miliknya -- yang di-skip di
+    #    sini cuma pencarian sinyal BARU.
     for symbol, cfg in SYMBOLS.items():
+        if not cfg.get("enabled", True):
+            print(f"[{symbol}] Di-pause (enabled=False), skip cari sinyal baru.")
+            continue
         candles = candles_by_symbol.get(symbol)
         if candles is None:
             continue
