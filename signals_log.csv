@@ -1,4 +1,4 @@
 signal_id,symbol,direction,entry_price,stop_loss,take_profit,entry_time,status,close_price,close_time,exit_type,result,return_pct
 XAUUSD-2026-09-23T133000,XAU/USD,down,4288.16507,4301.49355,4268.17236,2026-09-23 13:30:00,closed,4285.45528,2026-09-23 17:01:15,time_exit,win,0.06
 XAUUSD-2026-09-28T163000,XAU/USD,down,4132.69868,4149.83843,4106.98906,2026-09-28 16:30:00,closed,4128.94353,2026-09-28 17:01:11,time_exit,win,0.09
-QQQ-2026-10-22T152500,QQQ,down,708.14500,710.29330,704.92255,2026-10-22 15:25:00,open,,,,,
+QQQ-2026-10-22T152500,QQQ,down,708.14500,710.29330,704.92255,2026-10-22 15:25:00,closed,709.38000,2026-10-22 16:01:17,time_exit,loss,-0.17
